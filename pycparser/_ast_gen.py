@@ -94,17 +94,18 @@ class NodeCfg(object):
         if self.all_entries:
             args = ', '.join(self.all_entries)
             slots = ', '.join("'{0}'".format(e) for e in self.all_entries)
-            slots += ", 'coord', '__weakref__'"
-            arglist = '(self, %s, coord=None)' % args
+            slots += ", 'coord', 'data', '__weakref__'"
+            arglist = '(self, %s, coord=None, data=None)' % args
         else:
-            slots = "'coord', '__weakref__'"
-            arglist = '(self, coord=None)'
+            slots = "'coord', 'data', '__weakref__'"
+            arglist = '(self, coord=None, data=None)'
 
         src += "    __slots__ = (%s)\n" % slots
         src += "    def __init__%s:\n" % arglist
 
         for name in self.all_entries + ['coord']:
             src += "        self.%s = %s\n" % (name, name)
+        src += "        self.data = data if data is not None else dict()\n"
 
         return src
 
@@ -207,7 +208,7 @@ class Node(object):
 
         indent = ''
         separator = ''
-        for name in self.__slots__[:-2]:
+        for name in self.__slots__[:-3]:
             result += separator
             result += indent
             result += name + '=' + (_repr(getattr(self, name)).replace('\n', '\n  ' + (' ' * (len(name) + len(self.__class__.__name__)))))
